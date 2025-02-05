@@ -67,6 +67,18 @@ app.get('/alerts', async (req, res) => {
     }
 });
 
+app.get('/reset-alerts', async (req, res) => {
+    try {
+        // Write an empty array to the alerts file
+        await writeAlerts([]);
+        console.log('Alerts file has been reset');
+        res.json({ message: 'Alerts reset successful' });
+    } catch (error) {
+        console.error('Error resetting alerts:', error);
+        res.status(500).json({ error: 'Failed to reset alerts' });
+    }
+});
+
 function connectMQTT() {
     client = mqtt.connect(hiveMQConfig);
 
@@ -84,11 +96,11 @@ function connectMQTT() {
     client.on('message', async (topic, message) => {
         try {
             const messageStr = message.toString();
-            const machineName = topic.split('/')[1];
+            const controlName = topic.split('/')[1];
             
             console.log(`Received message:`);
             console.log(`Topic: ${topic}`);
-            console.log(`Machine Name: ${machineName}`);
+            console.log(`Control Name: ${controlName}`);
             console.log(`Message: ${messageStr}`);
 
             const [errorMessage, contactsPart] = messageStr.split(':SENDTO:');
@@ -99,7 +111,7 @@ function connectMQTT() {
 
                 const alert = {
                     timestamp: new Date().toISOString(),
-                    machineName,
+                    controlName,
                     errorMessage,
                     contacts: contacts.map(contact => ({
                         value: contact,
@@ -116,7 +128,7 @@ function connectMQTT() {
                 await writeAlerts(alerts);
 
                 if (emailAddresses.length > 0) {
-                    await sendEmail(emailAddresses, errorMessage, topic, machineName);
+                    await sendEmail(emailAddresses, errorMessage, topic, controlName);
                 }
 
                 if (phoneNumbers.length > 0) {
@@ -139,15 +151,15 @@ function connectMQTT() {
     });
 }
 
-async function sendEmail(recipients, errorMessage, topic, machineName) {
+async function sendEmail(recipients, errorMessage, topic, controlName) {
     try {
         const data = await resend.emails.send({
             from: 'onboarding@resend.dev',
             to: recipients,
-            subject: `Alert: ${machineName}`,
+            subject: `Alert: ${controlName}`,
             html: `
                 <h2>System Alert</h2>
-                <p><strong>Machine:</strong> ${machineName}</p>
+                <p><strong>Control Name:</strong> ${controlName}</p>
                 <p><strong>Topic:</strong> ${topic}</p>
                 <p><strong>Error:</strong> ${errorMessage}</p>
                 <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
