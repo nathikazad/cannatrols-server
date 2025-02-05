@@ -72,7 +72,7 @@ function connectMQTT() {
 
     client.on('connect', () => {
         console.log('Connected to HiveMQ broker');
-        client.subscribe('CommercialSystemAlerts/#', (err) => {
+        client.subscribe('CommercialSystemAlarms/#', (err) => {
             if (!err) {
                 console.log('Successfully subscribed to CommercialSystemAlerts/#');
             } else {
