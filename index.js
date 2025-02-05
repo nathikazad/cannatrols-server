@@ -140,7 +140,10 @@ function separateContactInfo(contacts) {
         return isValidFormat && isValidLength;
     });
     // console.log(`Returned ${{ emails, phoneNumbers }}`)
-    return { emails, phoneNumbers };
+    return {
+        emails: emails,
+        phoneNumbers: phoneNumbers
+    };
  }
 
 function connectMQTT() {
@@ -170,8 +173,9 @@ function connectMQTT() {
             const [errorMessage, contactsPart] = messageStr.split(':SENDTO:');
             if (contactsPart) {
                 console.log(`contacts ${contactsPart.split(',')}`)
-                const { emailAddresses, phoneNumbers } = separateContactInfo(contactsPart.split(','));
-                console.log(emailAddresses, phoneNumbers)
+                const splitContacts = separateContactInfo(contactsPart.split(','));
+                const emailAddresses = splitContacts.emails
+                const phoneNumbers = splitContacts.phoneNumbers
 
                 const alert = {
                     timestamp: new Date().toISOString(),
