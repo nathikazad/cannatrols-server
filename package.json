@@ -1,0 +1,20 @@
+{
+  "name": "cannatrols",
+  "version": "1.0.0",
+  "main": "index.js",
+  "engines": {
+    "node": "22.x"
+  }
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "firebase-admin": "^13.0.2",
+    "mqtt": "^5.10.3",
+    "resend": "^4.1.1",
+    "twilio": "^5.4.3"
+  }
+}
