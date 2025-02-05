@@ -176,10 +176,7 @@ function connectMQTT() {
                     timestamp: new Date().toISOString(),
                     controlName,
                     errorMessage,
-                    contacts: contacts.map(contact => ({
-                        value: contact,
-                        type: contact.includes('@') ? 'email' : 'phone'
-                    }))
+                    contacts: contactsPart.split(',')
                 };
 
                 const alerts = await readAlerts();
