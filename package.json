@@ -10,6 +10,7 @@
     "dev": "nodemon index.js"
   },
   "dependencies": {
+    "express": "^4.21.2",
     "mqtt": "^5.10.3",
     "resend": "^4.1.1",
     "twilio": "^5.4.3"
