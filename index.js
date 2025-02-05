@@ -89,13 +89,9 @@ async function sendEmail(recipients, errorMessage, topic, controlName) {
         const msg = {
             to: recipients,
             from: process.env.SENDGRID_FROM_EMAIL,
-            subject: `Alert: ${controlName}`,
+            subject: `Alert from ${controlName}`,
             html: `
-                <h2>System Alert</h2>
-                <p><strong>Control Name:</strong> ${controlName}</p>
-                <p><strong>Topic:</strong> ${topic}</p>
-                <p><strong>Error:</strong> ${errorMessage}</p>
-                <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+                <p><strong>${errorMessage}</strong></p>
             `,
         };
 
@@ -129,6 +125,24 @@ app.get('/reset-alerts', async (req, res) => {
     }
 });
 
+function separateContactInfo(contacts) {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^\+?[1]?[-\s]?\(?([0-9]{3})\)?[-\s]?([0-9]{3})[-\s]?([0-9]{4})$/;
+ 
+    const emails = contacts.filter(contact => emailRegex.test(contact.trim()));
+    
+    const phoneNumbers = contacts.filter(contact => {
+        const digitsOnly = contact.replace(/\D/g, '');
+        const isValidFormat = phoneRegex.test(contact.trim());
+        const isValidLength = digitsOnly.length === 10 || 
+            (digitsOnly.length === 11 && digitsOnly.startsWith('1'));
+        
+        return isValidFormat && isValidLength;
+    });
+ 
+    return { emails, phoneNumbers };
+ }
+
 function connectMQTT() {
     client = mqtt.connect(hiveMQConfig);
 
@@ -155,9 +169,8 @@ function connectMQTT() {
 
             const [errorMessage, contactsPart] = messageStr.split(':SENDTO:');
             if (contactsPart) {
-                const contacts = contactsPart.split(',');
-                const emailAddresses = contacts.filter(contact => contact.includes('@'));
-                const phoneNumbers = contacts.filter(contact => !contact.includes('@'));
+                const { emailAddresses, phoneNumbers } = separateContactInfo(contactsPart.split(','));
+
 
                 const alert = {
                     timestamp: new Date().toISOString(),
