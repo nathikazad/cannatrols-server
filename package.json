@@ -10,6 +10,7 @@
     "dev": "nodemon index.js"
   },
   "dependencies": {
+    "@sendgrid/mail": "^8.1.4",
     "express": "^4.21.2",
     "mqtt": "^5.10.3",
     "resend": "^4.1.1",
