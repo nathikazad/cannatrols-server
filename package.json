@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.4",
+    "@sinch/sdk-core": "^1.2.0",
     "express": "^4.21.2",
     "mqtt": "^5.10.3",
     "resend": "^4.1.1",

@@ -63,24 +63,39 @@ async function writeAlerts(alerts) {
 
 async function sendSMS(phoneNumbers, errorMessage, controlName) {
     try {
-        const messagePromises = phoneNumbers.map(phoneNumber => {
-            return twilioClient.messages.create({
-                body: `Alert: ${controlName}\nError: ${errorMessage}\nTime: ${new Date().toLocaleString()}`,
-                from: process.env.TWILIO_PHONE_NUMBER,
-                to: phoneNumber
-            });
+        const smsService = new SinchClient({
+            projectId: process.env['SINCH_PROJECT_ID'],
+            keyId: process.env['SINCH_KEY_ID'],
+            keySecret: process.env['SINCH_KEY_SECRET'],
+            smsRegion: process.env['SINCH_SMS_REGION'] || SmsRegion.UNITED_STATES,
         });
 
-        const results = await Promise.allSettled(messagePromises);
-        results.forEach((result, index) => {
-            if (result.status === 'fulfilled') {
-                console.log(`SMS sent successfully to ${phoneNumbers[index]}`);
-            } else {
-                console.error(`Failed to send SMS to ${phoneNumbers[index]}:`, result.reason);
-            }
+        const from = process.env['SINCH_FROM_NUMBER'];
+        const body = `Alert: ${controlName}\nError: ${errorMessage}\nTime: ${new Date().toLocaleString()}`;
+
+        const requestData = {
+            sendSMSRequestBody: {
+                type: 'mt_text',
+                from,
+                to: phoneNumbers,
+                body,
+            },
+        };
+
+        const response = await smsService.sms.batches.send(requestData);
+        
+        // Log success for all numbers since Sinch handles batch sending
+        phoneNumbers.forEach(phoneNumber => {
+            console.log(`SMS sent successfully to ${phoneNumber}`);
         });
+
+        return response;
     } catch (error) {
-        console.error('Error sending SMS:', error);
+        // Log the error and which numbers were affected
+        phoneNumbers.forEach(phoneNumber => {
+            console.error(`Failed to send SMS to ${phoneNumber}:`, error);
+        });
+        throw error;
     }
 }
 
