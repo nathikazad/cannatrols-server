@@ -2,18 +2,12 @@ const mqtt = require('mqtt');
 const express = require('express');
 const fs = require('fs').promises;
 const path = require('path');
-const twilio = require('twilio');
 const sgMail = require('@sendgrid/mail');
+const { SinchClient, SmsRegion } = require('@sinch/sdk-core');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ALERTS_FILE = path.join('/tmp', 'system_alerts.json');
-
-// Initialize Twilio
-const twilioClient = twilio(
-    process.env.TWILIO_ACCOUNT_SID,
-    process.env.TWILIO_AUTH_TOKEN
-);
 
 // Initialize SendGrid
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
