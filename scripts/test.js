@@ -1,3 +1,4 @@
+// to test the different npm packages
 const twilio = require('twilio');
 const { SinchClient, SmsRegion } = require('@sinch/sdk-core');
 

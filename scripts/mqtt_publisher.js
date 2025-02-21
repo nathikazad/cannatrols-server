@@ -1,4 +1,5 @@
-// publisher.js
+// mqtt_publisher.js
+// to test if the mqtt is forwarding correctly to heroku dyno
 const mqtt = require('mqtt');
 require('dotenv').config()
 // MQTT broker configuration
